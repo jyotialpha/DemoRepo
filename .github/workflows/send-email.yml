@@ -1,0 +1,28 @@
+name: Send Leave Application Email
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  send_email:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Send Email
+      env:
+        GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+        GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+      run: |
+        apt-get update && apt-get install -y ssmtp
+        echo "root=$GMAIL_USERNAME" >> /etc/ssmtp/ssmtp.conf
+        echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
+        echo "AuthUser=$GMAIL_USERNAME" >> /etc/ssmtp/ssmtp.conf
+        echo "AuthPass=$GMAIL_PASSWORD" >> /etc/ssmtp/ssmtp.conf
+        echo "UseSTARTTLS=YES" >> /etc/ssmtp/ssmtp.conf
+        echo "TLS_CA_File=/etc/ssl/certs/ca-certificates.crt" >> /etc/ssmtp/ssmtp.conf
+
+        echo -e "To: creationjp031@gmail.com\nFrom: $GMAIL_USERNAME\nSubject: Leave Application\n\nDear Jyotiranjan,\n\nI am writing to request leave from [start date] to [end date].\n\nBest regards,\n[Your Name]" | ssmtp creationjp031@gmail.com
